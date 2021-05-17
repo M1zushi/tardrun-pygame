@@ -22,10 +22,17 @@ clock = pygame.time.Clock()
 player_x = 30
 player_y = 250
 new_player_x = player_x
+new_player_y = player_y
 oldx = player_x
+
 player_speed = 0
 player_acceleration = 0.5
 max_player_speed = 7.5
+
+vertical_velocity = 0
+vertical_acceleration = 0.25
+max_jump = -6
+jump = False
 
 # Sets Drawings
 player_sprite = pygame.image.load('Assets/tardsprites/tard_00.png')
@@ -84,6 +91,32 @@ while active == True:
                 player_speed += player_acceleration
             new_player_x -= player_speed
 
+    # Initiates vertical physics and allows player to jump
+    if jump == False:
+        vertical_velocity += vertical_acceleration
+    new_player_y += vertical_velocity
+
+    if keys[pygame.K_UP]:
+        if vertical_velocity > max_jump:
+            vertical_velocity = -2
+            jump = True
+        else:
+            jump = False
+
+    # Checks for vertical collisions and if the player can move
+    new_player_rect = pygame.Rect(player_x, new_player_y, 60, 60)
+    y_collision = False
+
+    for r in platforms:
+        if r.colliderect(new_player_rect):
+            y_collision = True
+            vertical_velocity = 0
+            break
+
+    if y_collision == False:
+        player_y = new_player_y
+        vertical_velocity = 0
+
     # Checks for horizontal colisions and if the player can move
     new_player_rect = pygame.Rect(new_player_x, player_y, 60, 60)
     x_collision = False
@@ -95,14 +128,15 @@ while active == True:
 
     if x_collision == False:
         player_x = new_player_x
-        # Sets the "current" frame
+        # Updates the "current" frame
         newx = new_player_x
 
-    # Checks if the user is static by comparing this frame's position with the previous one
+    # Compares this frame's position with the previous before it updates
+    # Check if player = static
     if oldx == newx:
         player_speed = 0
 
-    # Sets the "previous" frame
+    # Updates the "previous" frame
     oldx = player_x
 
     # Updates Game Display
