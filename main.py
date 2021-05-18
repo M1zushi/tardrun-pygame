@@ -29,9 +29,8 @@ player_speed = 0
 player_acceleration = 0.5
 max_player_speed = 7.5
 
-vertical_velocity = 0
-vertical_acceleration = 0.25
-max_jump = -6
+velocity = 5
+mass = 1
 jump = False
 
 # Sets Drawings
@@ -93,14 +92,21 @@ while active == True:
 
     # Initiates vertical physics and allows player to jump
     if jump == False:
-        vertical_velocity += vertical_acceleration
-    new_player_y += vertical_velocity
-
-    if keys[pygame.K_UP]:
-        if vertical_velocity > max_jump:
-            vertical_velocity = -2
+        new_player_y += mass
+        if keys[pygame.K_UP]:
             jump = True
-        else:
+
+    if jump:
+        force = (1 / 2) * mass * (velocity**2)
+        new_player_y -= force
+        velocity -= 1
+
+        if velocity == 0:
+            mass = -1
+
+        if velocity <= -10:
+            velocity = 5
+            mass = 1
             jump = False
 
     # Checks for vertical collisions and if the player can move
@@ -110,12 +116,11 @@ while active == True:
     for r in platforms:
         if r.colliderect(new_player_rect):
             y_collision = True
-            vertical_velocity = 0
+            new_player_y -= mass
             break
 
     if y_collision == False:
         player_y = new_player_y
-        vertical_velocity = 0
 
     # Checks for horizontal colisions and if the player can move
     new_player_rect = pygame.Rect(new_player_x, player_y, 60, 60)
