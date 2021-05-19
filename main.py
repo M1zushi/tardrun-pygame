@@ -32,6 +32,7 @@ max_player_speed = 7.5
 velocity = 5
 mass = 1
 jump = False
+gravity = True
 
 # Sets Drawings
 player_sprite = pygame.image.load('Assets/tardsprites/tard_00.png')
@@ -91,10 +92,13 @@ while active == True:
             new_player_x -= player_speed
 
     # Initiates vertical physics and allows player to jump
+    # As well as free fall faster
     if jump == False:
-        new_player_y += mass
+        if gravity:
+            new_player_y += (mass * 3)
         if keys[pygame.K_UP]:
             jump = True
+            graivty = False
 
     if jump:
         force = (1 / 2) * mass * (velocity**2)
@@ -102,12 +106,16 @@ while active == True:
         velocity -= 1
 
         if velocity == 0:
-            mass = -1
+            mass -= 1
 
-        if velocity <= -10:
+        if velocity <= -6:
             velocity = 5
             mass = 1
             jump = False
+            gravity = True
+
+    if keys[pygame.K_DOWN]:
+        new_player_y += 10
 
     # Checks for vertical collisions and if the player can move
     new_player_rect = pygame.Rect(player_x, new_player_y, 60, 60)
@@ -116,7 +124,7 @@ while active == True:
     for r in platforms:
         if r.colliderect(new_player_rect):
             y_collision = True
-            new_player_y -= mass
+            gravity = False
             break
 
     if y_collision == False:
